@@ -436,20 +436,5 @@
 				$("#data_form").show();
 			});
 		}
-		
-		function listBookmarks_demo() {
-			$('#notes_list').empty();
-			
-			for (i = 0; i < bookmarks.length; i++) {
-				var data = bookmarks[i];
-				
-				var noteElement = $('<li class="list-group-item">'+data.title+'</li>');
-				noteElement.click(function(e){
-					alert($(this).text());
-					simplemde.value($(this).text());
-				});
-				$('#notes_list').append(noteElement);
-			}
-		}
 	</script>
 </html>
