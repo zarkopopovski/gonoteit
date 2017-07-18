@@ -279,7 +279,8 @@
 				<div class="panel panel-default">
 					<div class="panel-heading">Note</div>
 					<div class="panel-body">
-						<p align="right"><button class="btn btn-primary btn-block; width:100px" id="btn-save">Save</button></p>
+						<p align="right"><button class="btn btn-primary btn-block; width:100px" id="btn-save">Save</button>
+						<button class="btn btn-danger btn-block; width:100px" id="btn-delete">Delete</button></p>
 						<input type="text" name="title" id="title" tabindex="1" class="form-control" placeholder="Title" value="">
 						<br/>
 						<textarea rows="4" cols="50" id="simplemde"></textarea>
@@ -404,11 +405,39 @@
 					alert("Your note was successfully saved.");
 				}
 
+				$("#title").val("");
+				simplemde.value("");
+				$("#note_id").val("");
+
 			})
 			.fail(function(data){
 				alert("Something is wrong with your saving.");
 			});			
 
+		});
+
+		$("#btn-delete").click(function(event){
+			event.preventDefault();
+			var noteID = $("#note_id").val();
+
+			if (noteID == "") {
+				alert("Nothing to delete.");
+				return	
+			}
+
+			$.post("http://localhost:8080/delete_note", {note_id: noteID}).done(function( data ) {
+				$("#title").val("");
+				simplemde.value("");
+				$("#note_id").val("");
+
+				alert("Note is successfully deleted.");
+
+				listNotes();
+			})
+			.fail(function(data){
+				alert("Error with note deleting.");
+			});
+			
 		});
 		
 		function listNotes() {
