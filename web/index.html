@@ -163,7 +163,7 @@
 	} 
   
 	</style>
-	<title>gNote</title>
+	<title>goNoteIT</title>
 	</head>
 	<body>
 	
@@ -400,7 +400,7 @@
 						simplemde.value(savedNote.body);
 						$("#note_id").val(savedNote.noteID);
 					});
-					$('#notes_list').append(noteElement);
+					$('#notes_list').prepend(noteElement);
 
 					alert("Your note was successfully saved.");
 				}
