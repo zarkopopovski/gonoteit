@@ -446,6 +446,7 @@
 
 				if (data) {
 					$('#notes_list').empty();
+					bookmarks = [];
 					for (i = 0; i < data.length; i++) {
 						var note = {noteID:data[i].id, title:data[i].title, body:data[i].body, date:data[i].date_created};
 						bookmarks.push(note);
