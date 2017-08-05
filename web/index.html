@@ -60,6 +60,9 @@
 	    day: "numeric", hour: "2-digit", minute: "2-digit"  
 	};  
 
+	var baseURL = "localhost";
+	var defaultPort = 8080;
+
 	</script>
 	<style>
 	
@@ -306,7 +309,7 @@
 				return
 			}
 
-			$.post("http://localhost:8080/register_user", {username: username, password: password, email: email}).done(function( data ) {
+			$.post("http://"+baseURL+":"+defaultPort+"/register_user", {username: username, password: password, email: email}).done(function( data ) {
 
 				if (data == null) {
 					alert("Something is wrong with account registration");
@@ -330,7 +333,7 @@
 			var username = $("#username").val();
 			var password = $("#password").val();
 			
-			$.post("http://localhost:8080/login_user", {username: username, password: password}).done(function( data ) {
+			$.post("http://"+baseURL+":"+defaultPort+"/login_user", {username: username, password: password}).done(function( data ) {
 
 				userID = data.id;
 
@@ -377,7 +380,7 @@
 				dateCreated = moment(date).format("DD/MM/YYYY HH:MM:SS");
 			}
 
-			$.post("http://localhost:8080/save_note", 
+			$.post("http://"+baseURL+":"+defaultPort+"/save_note", 
 				{user_id:userID, note_id: noteID, title: title, body: body, date_created: dateCreated})
 			.done(function( data ) {
 
@@ -430,7 +433,7 @@
 				return	
 			}
 
-			$.post("http://localhost:8080/delete_note", {note_id: noteID}).done(function( data ) {
+			$.post("http://"+baseURL+":"+defaultPort+"/delete_note", {note_id: noteID}).done(function( data ) {
 				$("#title").val("");
 				simplemde.value("");
 				$("#note_id").val("");
@@ -446,7 +449,7 @@
 		});
 		
 		function listNotes() {
-			$.post("http://localhost:8080/list_notes", {user_id: userID}).done(function( data ) {
+			$.post("http://"+baseURL+":"+defaultPort+"/list_notes", {user_id: userID}).done(function( data ) {
 				console.log(data);
 
 				if (data) {
