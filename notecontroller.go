@@ -50,36 +50,53 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 
 		noteID = fmt.Sprintf("%x", sha1HashString)
 
-		query = "INSERT INTO notes(id, user_id, title, body, date_created) VALUES('" + noteID + "','" + userID + "','" + title + "','" + body + "', '" + dateCreated + "')"
-	} else {
-		query = "UPDATE notes SET title='" + title + "', body='" + body + "' WHERE id='" + noteID + "'"
-	}
+		query = "INSERT INTO notes(id, user_id, title, body, date_created) VALUES($1, $2, $3, $4, $5)"
+		_, err := nController.dbConnection.db.Exec(query, noteID, userID, title, body, dateCreated)
 
-	_, err := nController.dbConnection.db.Exec(query)
+		if err == nil {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
 
-	if err == nil {
+			if err := json.NewEncoder(w).Encode(map[string]string{"status": "success", "error_code": "0", "note_id": noteID}); err != nil {
+				panic(err)
+			}
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusOK)
-
-		if err := json.NewEncoder(w).Encode(map[string]string{"status": "success", "error_code": "0", "note_id": noteID}); err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		if err := json.NewEncoder(w).Encode(err); err != nil {
 			panic(err)
 		}
-		return
+	} else {
+		query = "UPDATE notes SET title='$1', body='$2' WHERE id='$3'"
+		_, err := nController.dbConnection.db.Exec(query, title, body, noteID)
+
+		if err == nil {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			w.WriteHeader(http.StatusOK)
+
+			if err := json.NewEncoder(w).Encode(map[string]string{"status": "success", "error_code": "0", "note_id": noteID}); err != nil {
+				panic(err)
+			}
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusNotFound)
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			panic(err)
+		}
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotFound)
-	if err := json.NewEncoder(w).Encode(err); err != nil {
-		panic(err)
-	}
 }
 
 func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	noteID := r.FormValue("note_id")
 
-	query := "DELETE FROM notes WHERE id='" + noteID + "'"
+	query := "DELETE FROM notes WHERE id='$1'"
 
-	_, err := nController.dbConnection.db.Exec(query)
+	_, err := nController.dbConnection.db.Exec(query, noteID)
 
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -101,9 +118,9 @@ func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http
 func (nController *NoteController) listAllUserNotes(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID := r.FormValue("user_id")
 
-	query := "SELECT id, title, body, date_created FROM notes WHERE user_id='" + userID + "' ORDER BY date_created DESC"
+	query := "SELECT id, title, body, date_created FROM notes WHERE user_id='$1' ORDER BY date_created DESC"
 
-	rows, err := nController.dbConnection.db.Query(query)
+	rows, err := nController.dbConnection.db.Query(query, userID)
 
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

@@ -30,9 +30,9 @@ func (uController *UserController) registerNewUser(w http.ResponseWriter, r *htt
 
 	userID := fmt.Sprintf("%x", sha1HashString)
 
-	query := "INSERT INTO users(id, username, email, password) VALUES('" + userID + "','" + username + "','" + email + "','" + passwordEnc + "')"
+	query := "INSERT INTO users(id, username, email, password) VALUES($1, $2, $3, $4)"
 
-	_, err := uController.dbConnection.db.Exec(query)
+	_, err := uController.dbConnection.db.Exec(query, userID, username, email, passwordEnc)
 
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -67,11 +67,11 @@ func (uController *UserController) checkUserCredentials(w http.ResponseWriter, r
 
 	passwordEnc := fmt.Sprintf("%x", sha1HashString)
 
-	query := "SELECT id, username, email FROM users WHERE username='" + username + "' AND password = '" + passwordEnc + "'"
+	query := "SELECT id, username, email FROM users WHERE username='$1' AND password = '$2'"
 
 	newUser := new(UserModel)
 
-	err := uController.dbConnection.db.QueryRow(query).Scan(
+	err := uController.dbConnection.db.QueryRow(query, username, passwordEnc).Scan(
 		&newUser.Id,
 		&newUser.UserName,
 		&newUser.Email)
