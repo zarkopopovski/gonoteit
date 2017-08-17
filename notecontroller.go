@@ -118,7 +118,7 @@ func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http
 func (nController *NoteController) listAllUserNotes(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	userID := r.FormValue("user_id")
 
-	query := "SELECT id, title, body, date_created FROM notes WHERE user_id='$1' ORDER BY date_created DESC"
+	query := "SELECT id, title, body, date_created FROM notes WHERE user_id=$1 ORDER BY date_created DESC"
 
 	rows, err := nController.dbConnection.db.Query(query, userID)
 
