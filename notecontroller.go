@@ -39,7 +39,7 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 	noteID := r.FormValue("note_id")
 	title := r.FormValue("title")
 	body := r.FormValue("body")
-	dateCreated := r.FormValue("date_created")
+	//dateCreated := r.FormValue("date_created")
 
 	query := ""
 
@@ -50,8 +50,8 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 
 		noteID = fmt.Sprintf("%x", sha1HashString)
 
-		query = "INSERT INTO notes(id, user_id, title, body, date_created) VALUES($1, $2, $3, $4, $5)"
-		_, err := nController.dbConnection.db.Exec(query, noteID, userID, title, body, dateCreated)
+		query = "INSERT INTO notes(id, user_id, title, body, date_created) VALUES($1, $2, $3, $4, datetime('now'))"
+		_, err := nController.dbConnection.db.Exec(query, noteID, userID, title, body)
 
 		if err == nil {
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -69,7 +69,7 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 			panic(err)
 		}
 	} else {
-		query = "UPDATE notes SET title='$1', body='$2' WHERE id='$3'"
+		query = "UPDATE notes SET title=$1, body=$2 WHERE id=$3"
 		_, err := nController.dbConnection.db.Exec(query, title, body, noteID)
 
 		if err == nil {
@@ -94,7 +94,7 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	noteID := r.FormValue("note_id")
 
-	query := "DELETE FROM notes WHERE id='$1'"
+	query := "DELETE FROM notes WHERE id=$1"
 
 	_, err := nController.dbConnection.db.Exec(query, noteID)
 

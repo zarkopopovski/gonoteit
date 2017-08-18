@@ -67,7 +67,7 @@ func (uController *UserController) checkUserCredentials(w http.ResponseWriter, r
 
 	passwordEnc := fmt.Sprintf("%x", sha1HashString)
 
-	query := "SELECT id, username, email FROM users WHERE username=$1 AND password = $2"
+	query := "SELECT id, username, email FROM users WHERE username=$1 AND password=$2"
 
 	newUser := new(UserModel)
 

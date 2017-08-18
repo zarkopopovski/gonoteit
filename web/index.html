@@ -385,33 +385,12 @@
 			.done(function( data ) {
 
 				if (noteID != "") {
-					note.title = title;
-					note.body = body;
-
-					$("#notes_list li:eq("+$(this).index()+")").html(note.date+"</br>"+note.title);
-
-					alert("Note is successfully updated");
+					alert("Note is successfully updated.");
 				} else {
-					note = {noteID:data.note_id, title:title, body:body, date:moment(date).format("DD/MM/YYYY HH:MM:SS")};
-					//bookmarks.push(note);
-					bookmarks.unshift(note);
-
-					var noteElement = $('<li class="list-group-item">'+note.date+'<br/>'+note.title+'</li>');
-					
-					$('#notes_list').prepend(noteElement);
-
-					$('#notes_list li').unbind();
-					$('#notes_list li').click(function(event){
-						var index = $(this).index();
-						var savedNote = bookmarks[index];
-
-							$("#title").val(savedNote.title);
-							simplemde.value(savedNote.body);
-							$("#note_id").val(savedNote.noteID);
-					});
-
 					alert("Your note was successfully saved.");
 				}
+
+				listNotes();
 
 				$("#title").val("");
 				simplemde.value("");
