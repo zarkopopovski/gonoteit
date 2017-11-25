@@ -4,17 +4,21 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
 
 	"io/ioutil"
 
 	"git.cerebralab.com/george/logo"
+
+	"gopkg.in/gomail.v2"
 )
 
 type NoteController struct {
 	dbConnection *DBConnection
+	config       *Config
 }
 
 func (nController *NoteController) index(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -39,7 +43,16 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 	noteID := r.FormValue("note_id")
 	title := r.FormValue("title")
 	body := r.FormValue("body")
+
+	config := nController.config
+
 	//dateCreated := r.FormValue("date_created")
+	userEmail := ""
+	userQuery := "SELECT email FROM users WHERE id=$1"
+	e := nController.dbConnection.db.QueryRow(userQuery, userID).Scan(&userEmail)
+
+	if e != nil {
+	}
 
 	query := ""
 
@@ -60,6 +73,22 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 			if err := json.NewEncoder(w).Encode(map[string]string{"status": "success", "error_code": "0", "note_id": noteID}); err != nil {
 				panic(err)
 			}
+
+			if userEmail != "" {
+				m := gomail.NewMessage()
+
+				m.SetHeader("From", config.mailUsername)
+				m.SetHeader("To", userEmail)
+				m.SetHeader("Subject", "goNoteIT: New note notification")
+				m.SetBody("text/html", "Hi, you have just created new note <br/>"+title+"<br/>"+body)
+
+				d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
+
+				if err := d.DialAndSend(m); err != nil {
+					//panic(err)
+				}
+			}
+
 			return
 		}
 
@@ -79,6 +108,22 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 			if err := json.NewEncoder(w).Encode(map[string]string{"status": "success", "error_code": "0", "note_id": noteID}); err != nil {
 				panic(err)
 			}
+
+			if userEmail != "" {
+				m := gomail.NewMessage()
+
+				m.SetHeader("From", config.mailUsername)
+				m.SetHeader("To", userEmail)
+				m.SetHeader("Subject", "goNoteIT: New note notification")
+				m.SetBody("text/html", "Hi, your note <b>"+title+"</b> is updated.")
+
+				d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
+
+				if err := d.DialAndSend(m); err != nil {
+					//panic(err)
+				}
+			}
+
 			return
 		}
 

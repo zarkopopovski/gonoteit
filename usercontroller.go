@@ -4,13 +4,15 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type UserController struct {
 	dbConnection *DBConnection
+	config       *Config
 }
 
 func (uController *UserController) registerNewUser(w http.ResponseWriter, r *http.Request, params httprouter.Params) {

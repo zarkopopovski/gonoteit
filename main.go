@@ -2,26 +2,43 @@ package main
 
 import (
 	//"flag"
-	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+
+	"strconv"
+
+	"github.com/knq/ini"
 )
 
 type GNoteAPI struct {
 	dbConnection *DBConnection
 	uController  *UserController
 	nController  *NoteController
+	config       *Config
 }
 
-func CreateGNoteAPI() *GNoteAPI {
+type Config struct {
+	mailServer   string
+	mailPort     int
+	mailUsername string
+	mailPassword string
+}
+
+func CreateGNoteAPI(config *Config) *GNoteAPI {
 	apiHandlers := &GNoteAPI{
 		dbConnection: CreateDBConnection(),
 		uController:  &UserController{},
 		nController:  &NoteController{},
+		config:       config,
 	}
 
 	apiHandlers.uController.dbConnection = apiHandlers.dbConnection
+	apiHandlers.uController.config = apiHandlers.config
+
 	apiHandlers.nController.dbConnection = apiHandlers.dbConnection
+	apiHandlers.nController.config = apiHandlers.config
 
 	return apiHandlers
 }
@@ -42,8 +59,30 @@ func CreateNewRouter(handlers *GNoteAPI) *httprouter.Router {
 }
 
 func main() {
-	gnoteAPI := CreateGNoteAPI()
+
+	fileCfg, err := ini.LoadFile("config.cfg")
+	if err != nil {
+		log.Fatal("Error with service configuration %s", err)
+	}
+
+	port := fileCfg.GetKey("service-1.port")
+
+	if port == "" {
+		log.Fatal("Error with port number configuration")
+	}
+
+	serverPort := fileCfg.GetKey("service-1.mailport")
+	serverPortI, _ := strconv.Atoi(serverPort)
+
+	config := &Config{
+		mailServer:   fileCfg.GetKey("service-1.mailserver"),
+		mailPort:     serverPortI,
+		mailUsername: fileCfg.GetKey("service-1.mailusername"),
+		mailPassword: fileCfg.GetKey("service-1.mailpassword"),
+	}
+
+	gnoteAPI := CreateGNoteAPI(config)
 	router := CreateNewRouter(gnoteAPI)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
