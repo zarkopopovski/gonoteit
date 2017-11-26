@@ -12,8 +12,6 @@ import (
 	"io/ioutil"
 
 	"git.cerebralab.com/george/logo"
-
-	"gopkg.in/gomail.v2"
 )
 
 type NoteController struct {
@@ -74,18 +72,13 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 			}
 
 			if userEmail != "" {
-				m := gomail.NewMessage()
-
-				m.SetHeader("From", config.mailUsername)
-				m.SetHeader("To", userEmail)
-				m.SetHeader("Subject", "goNoteIT: System notification")
-				m.SetBody("text/html", "Hi, you have just created new note <br/>"+title+"<br/>"+body)
-
-				d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
-
-				if err := d.DialAndSend(m); err != nil {
-					//panic(err)
+				notifier := &Notifier{
+					config:    config,
+					userMail:  userEmail,
+					noteTitle: title,
+					noteBody:  body,
 				}
+				notifier.sendNotification("create")
 			}
 
 			return
@@ -109,18 +102,12 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 			}
 
 			if userEmail != "" {
-				m := gomail.NewMessage()
-
-				m.SetHeader("From", config.mailUsername)
-				m.SetHeader("To", userEmail)
-				m.SetHeader("Subject", "goNoteIT: System notification")
-				m.SetBody("text/html", "Hi, your note <b>"+title+"</b> is updated.")
-
-				d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
-
-				if err := d.DialAndSend(m); err != nil {
-					//panic(err)
+				notifier := &Notifier{
+					config:    config,
+					userMail:  userEmail,
+					noteTitle: title,
 				}
+				notifier.sendNotification("edit")
 			}
 
 			return
@@ -162,18 +149,14 @@ func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http
 		}
 
 		if userEmail != "" {
-			m := gomail.NewMessage()
-
-			m.SetHeader("From", config.mailUsername)
-			m.SetHeader("To", userEmail)
-			m.SetHeader("Subject", "goNoteIT: System notification")
-			m.SetBody("text/html", "Hi, your note <b>"+noteTitle+"</b> created on "+dateCreated+" is deleted. Bellow you can see the note<br/>"+noteBody)
-
-			d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
-
-			if err := d.DialAndSend(m); err != nil {
-				//panic(err)
+			notifier := &Notifier{
+				config:      config,
+				userMail:    userEmail,
+				noteTitle:   noteTitle,
+				noteBody:    noteBody,
+				dateCreated: dateCreated,
 			}
+			notifier.sendNotification("delete")
 		}
 
 		return
