@@ -46,7 +46,6 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 
 	config := nController.config
 
-	//dateCreated := r.FormValue("date_created")
 	userEmail := ""
 	userQuery := "SELECT email FROM users WHERE id=$1"
 	e := nController.dbConnection.db.QueryRow(userQuery, userID).Scan(&userEmail)
@@ -79,7 +78,7 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 
 				m.SetHeader("From", config.mailUsername)
 				m.SetHeader("To", userEmail)
-				m.SetHeader("Subject", "goNoteIT: New note notification")
+				m.SetHeader("Subject", "goNoteIT: System notification")
 				m.SetBody("text/html", "Hi, you have just created new note <br/>"+title+"<br/>"+body)
 
 				d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
@@ -114,7 +113,7 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 
 				m.SetHeader("From", config.mailUsername)
 				m.SetHeader("To", userEmail)
-				m.SetHeader("Subject", "goNoteIT: New note notification")
+				m.SetHeader("Subject", "goNoteIT: System notification")
 				m.SetBody("text/html", "Hi, your note <b>"+title+"</b> is updated.")
 
 				d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
@@ -139,6 +138,17 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	noteID := r.FormValue("note_id")
 
+	noteTitle := ""
+	noteBody := ""
+	dateCreated := ""
+
+	userEmail := ""
+
+	noteQuery := "SELECT n.title, n.body, n.date_created, u.email FROM notes n INNER JOIN users u ON n.id=$1 AND n.user_id=u.id"
+	_ = nController.dbConnection.db.QueryRow(noteQuery, noteID).Scan(&noteTitle, &noteBody, &dateCreated, &userEmail)
+
+	config := nController.config
+
 	query := "DELETE FROM notes WHERE id=$1"
 
 	_, err := nController.dbConnection.db.Exec(query, noteID)
@@ -150,6 +160,22 @@ func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http
 		if err := json.NewEncoder(w).Encode(map[string]string{"status": "success", "error_code": "0"}); err != nil {
 			panic(err)
 		}
+
+		if userEmail != "" {
+			m := gomail.NewMessage()
+
+			m.SetHeader("From", config.mailUsername)
+			m.SetHeader("To", userEmail)
+			m.SetHeader("Subject", "goNoteIT: System notification")
+			m.SetBody("text/html", "Hi, your note <b>"+noteTitle+"</b> created on "+dateCreated+" is deleted. Bellow you can see the note<br/>"+noteBody)
+
+			d := gomail.NewPlainDialer(config.mailServer, config.mailPort, config.mailUsername, config.mailPassword)
+
+			if err := d.DialAndSend(m); err != nil {
+				//panic(err)
+			}
+		}
+
 		return
 	}
 
