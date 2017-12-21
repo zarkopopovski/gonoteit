@@ -10,8 +10,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"io/ioutil"
-
-	"git.cerebralab.com/george/logo"
 )
 
 type NoteController struct {
@@ -22,10 +20,10 @@ type NoteController struct {
 func (nController *NoteController) index(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	index, err := ioutil.ReadFile("./web/index.html")
 
-	logo.RuntimeError(err)
+	panic(err)
 
 	if err != nil {
-		logo.RuntimeError(err)
+		panic(err)
 		return
 	}
 
