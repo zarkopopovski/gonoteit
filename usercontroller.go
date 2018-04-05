@@ -36,6 +36,9 @@ func (uController *UserController) registerNewUser(w http.ResponseWriter, r *htt
 
 	_, err := uController.dbConnection.db.Exec(query, userID, username, email, passwordEnc)
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -77,6 +80,9 @@ func (uController *UserController) checkUserCredentials(w http.ResponseWriter, r
 		&newUser.Id,
 		&newUser.UserName,
 		&newUser.Email)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

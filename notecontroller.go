@@ -51,6 +51,9 @@ func (nController *NoteController) saveUserNote(w http.ResponseWriter, r *http.R
 
 	query := ""
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	if noteID == "" {
 		sha1Hash := sha1.New()
 		sha1Hash.Write([]byte(time.Now().String() + title + body + userID))
@@ -138,6 +141,9 @@ func (nController *NoteController) deleteUserNote(w http.ResponseWriter, r *http
 
 	_, err := nController.dbConnection.db.Exec(query, noteID)
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
@@ -173,6 +179,9 @@ func (nController *NoteController) listAllUserNotes(w http.ResponseWriter, r *ht
 	query := "SELECT id, title, body, date_created FROM notes WHERE user_id=$1 ORDER BY date_created DESC"
 
 	rows, err := nController.dbConnection.db.Query(query, userID)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
