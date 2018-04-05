@@ -20,7 +20,7 @@ type NoteController struct {
 func (nController *NoteController) index(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	index, err := ioutil.ReadFile("./web/index.html")
 
-	panic(err)
+	//panic(err)
 
 	if err != nil {
 		panic(err)
@@ -29,11 +29,16 @@ func (nController *NoteController) index(w http.ResponseWriter, r *http.Request,
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprintf(w, string(index))
 }
 
 func (nController *NoteController) ShowFavIcon(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "image/png")
+
 	http.ServeFile(w, r, "./web/favicon.png")
 }
 
