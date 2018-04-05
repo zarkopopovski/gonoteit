@@ -27,6 +27,9 @@ func (nController *NoteController) index(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	fmt.Fprintf(w, string(index))
 }
 
